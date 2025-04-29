@@ -1,11 +1,24 @@
 from gui import *
 import random
+#https://docs.python.org/3/library/random.html
 
 class Logic:
-    def __init__(self, gui):
+    """
+    A class representing the logic for the GUI.
+    """
+    def __init__(self, gui) -> None:
+        """
+        Method to initialize the GUI.
+        :param gui: The GUI.
+        :return: None
+        """
         self.gui = gui
 
-    def submit(self):
+    def submit(self) -> None:
+        """
+        Method to check valid bet and roll the slots.
+        :return: None
+        """
         try:
             bet = int(self.gui.input_bet.get())
             if bet <= 0:
@@ -21,7 +34,11 @@ class Logic:
         except ValueError:
             self.gui.label_instructions.config(text="Enter a valid bet value")
 
-    def reset(self):
+    def reset(self) -> None:
+        """
+        Method to reset the GUI.
+        :return: None
+        """
         self.gui.label_instructions.config(text="")
         self.gui.balance = 1000
         self.gui.label_balance_number.config(text=f'{self.gui.balance}')
@@ -31,12 +48,20 @@ class Logic:
         self.gui.input_bet.delete(0, END)
         self.gui.window.focus_set()
 
-    def roll(self):
+    def roll(self) -> None:
+        """
+        Method to initialize the roll and begin the rolling.
+        :return: None
+        """
         self.gui.roll_count = 0
         self.gui.sleeptime = 10
-        self.gui.animate_roll()
+        self.animate_roll()
 
-    def animate_roll(self):
+    def animate_roll(self) -> None:
+        """
+        Method to animate the roll and call the final roll.
+        :return: None
+        """
         if self.gui.roll_count <= 14:
             rolled_image1 = self.gui.shape_images[random.randint(0, 5)]
             rolled_image2 = self.gui.shape_images[random.randint(0, 5)]
@@ -46,14 +71,18 @@ class Logic:
             self.gui.slot3.config(image=rolled_image3)
             self.gui.roll_count += 1
             self.gui.sleeptime += 5
-            self.gui.window.after(self.gui.sleeptime, self.gui.animate_roll)
+            self.gui.window.after(self.gui.sleeptime, self.animate_roll)
         else:
             self.choose_shapes()
             self.gui.window.after(100, lambda: self.gui.save_button.config(state="normal"))
             self.gui.window.after(100, lambda: self.gui.input_bet.config(state="normal"))
             self.gui.window.after(100, lambda: self.gui.reset_button.config(state="normal"))
 
-    def choose_shapes(self):
+    def choose_shapes(self) -> None:
+        """
+        Method to decide the final roll, set its display, and call to adjust the balance.
+        :return: None
+        """
         roll = random.uniform(0, 100)
         shapes = {
             "star": 0,
@@ -101,7 +130,12 @@ class Logic:
         self.gui.slot3.config(image=self.gui.shape_images[result[2]])
         self.adjust_balance(payout_multiplier)
 
-    def adjust_balance(self, payout_multiplier):
+    def adjust_balance(self, payout_multiplier: int) -> None:
+        """
+        Method to adjust the balance based on the bet and roll.
+        :param payout_multiplier: The number to multiply the bet with to get the winnings.
+        :return: None
+        """
         bet = self.gui.current_bet
         winnings = bet * payout_multiplier
         self.gui.balance = self.gui.balance - bet + winnings
