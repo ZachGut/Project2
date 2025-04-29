@@ -1,9 +1,19 @@
 from tkinter import *
 from logic import *
 from PIL import ImageTk, Image
+#https://pillow.readthedocs.io/en/stable/handbook/tutorial.html
 
 class Gui:
-    def __init__(self, window, logic):
+    """
+    A class representing a GUI object.
+    """
+    def __init__(self, window, logic) -> None:
+        """
+        Method to set default values and initialize the GUI.
+        :param window: The GUI window.
+        :param logic: The logic to use.
+        :return: None
+        """
         self.window = window
         self.logic = logic
         self.balance = 1000
@@ -65,7 +75,11 @@ class Gui:
         self.reset_button.pack()
         self.frame_seven.pack(pady=5)
 
-    def load_images(self):
+    def load_images(self) -> None:
+        """
+        Method to load the images for the GUI.
+        :return: None
+        """
         self.img_blank = ImageTk.PhotoImage(Image.open("images/blank.png").resize((100, 100)))
         self.img_square = ImageTk.PhotoImage(Image.open("images/square.png").resize((100, 100)))
         self.img_circle = ImageTk.PhotoImage(Image.open("images/circle.png").resize((100, 100)))
@@ -73,14 +87,19 @@ class Gui:
         self.img_diamond = ImageTk.PhotoImage(Image.open("images/diamond.png").resize((100, 100)))
         self.img_heart = ImageTk.PhotoImage(Image.open("images/heart.png").resize((100, 100)))
         self.img_triangle = ImageTk.PhotoImage(Image.open("images/triangle.png").resize((100, 100)))
-        self.img_payout_table = ImageTk.PhotoImage(Image.open("images/payout_table.png").resize((300, 500)))
+        self.img_payout_table = ImageTk.PhotoImage(Image.open("images/payout_table.png").resize((200, 300))) #300, 500 for larger screens
         self.img_save = ImageTk.PhotoImage(Image.open("images/button.png").resize((100, 100)))
 
-    def submit(self):
+    def submit(self) -> None:
+        """
+        Method to send the button press to logic.
+        :return: None
+        """
         self.logic.submit()
 
-    def reset(self):
+    def reset(self) -> None:
+        """
+        Method to send the reset press to logic.
+        :return: None
+        """
         self.logic.reset()
-
-    def animate_roll(self):
-        self.logic.animate_roll()
