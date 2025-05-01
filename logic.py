@@ -80,7 +80,7 @@ class Logic:
 
     def choose_shapes(self) -> None:
         """
-        Method to decide the final roll, set its display, and call to adjust the balance.
+        Method to decide the final roll, set its display, call to adjust the balance, and call to display winnings.
         :return: None
         """
         roll = random.uniform(0, 100)
@@ -96,21 +96,27 @@ class Logic:
         if roll <= 1:  # 1%
             result = [shapes["star"]] * 3
             payout_multiplier = 30
+            winnings_text = "Stars"
         elif roll <= 2.5:  # 1.5%
             result = [shapes["diamond"]] * 3
             payout_multiplier = 12
+            winnings_text = "Diamonds"
         elif roll <= 4:  # 1.5%
             result = [shapes["circle"]] * 3
             payout_multiplier = 9
+            winnings_text = "Circles"
         elif roll <= 6:  # 2%
             result = [shapes["square"]] * 3
             payout_multiplier = 6
+            winnings_text = "Squares"
         elif roll <= 8:  # 2%
             result = [shapes["triangle"]] * 3
             payout_multiplier = 4
+            winnings_text = "Triangles"
         elif roll <= 10:  # 2%
             result = [shapes["heart"]] * 3
             payout_multiplier = 3
+            winnings_text = "Hearts"
         elif roll <= 40:  # 30%
             pair_shape = random.randint(0, 5)
             available_shapes = []
@@ -121,22 +127,44 @@ class Logic:
             result = [pair_shape, pair_shape, other_shape]
             random.shuffle(result)
             payout_multiplier = 2
+            winnings_text = "Pair"
         else:
             result = random.sample(range(6), 3)  # 60%
             payout_multiplier = 0
+            winnings_text = "Nothing"
 
         self.gui.slot1.config(image=self.gui.shape_images[result[0]])
         self.gui.slot2.config(image=self.gui.shape_images[result[1]])
         self.gui.slot3.config(image=self.gui.shape_images[result[2]])
-        self.adjust_balance(payout_multiplier)
 
-    def adjust_balance(self, payout_multiplier: int) -> None:
-        """
-        Method to adjust the balance based on the bet and roll.
-        :param payout_multiplier: The number to multiply the bet with to get the winnings.
-        :return: None
-        """
         bet = self.gui.current_bet
         winnings = bet * payout_multiplier
+        self.adjust_balance(bet, winnings)
+
+        profit = winnings - bet
+        self.display_winnings(profit, winnings_text)
+
+    def adjust_balance(self, bet: int, winnings: int) -> None:
+        """
+        Method to adjust the balance based on the bet and roll.
+        :param bet: The amount of the bet.
+        :param winnings: The bet times the payout multiplier.
+        :return: None
+        """
         self.gui.balance = self.gui.balance - bet + winnings
         self.gui.label_balance_number.config(text=f'{self.gui.balance}')
+
+    def display_winnings(self, profit: int, winnings_text: str) -> None:
+        """
+        Method to display the winnings in text format.
+        This method was added as feedback from the instructor.
+        :param profit: The winnings minus the initial bet.
+        :param winnings_text: The text to display.
+        :return: None
+        """
+        if winnings_text == "Pair":
+            self.gui.label_instructions.config(text=f'You made {profit} profit with a {winnings_text} of shapes.')
+        elif winnings_text == "Nothing":
+            self.gui.label_instructions.config(text=f'You lost {profit * -1} money with no matching shapes.')
+        else:
+            self.gui.label_instructions.config(text=f'You made {profit} profit with 3 {winnings_text}.')
