@@ -53,7 +53,7 @@ class Gui:
         self.frame_three.pack(pady=10)
 
         self.frame_four = Frame(self.window)
-        self.label_instructions = Label(self.frame_four, text="")
+        self.label_instructions = Label(self.frame_four, text="") #Displays instructions and winnings in text format
         self.label_instructions.pack()
         self.frame_four.pack()
 
