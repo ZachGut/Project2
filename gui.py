@@ -1,170 +1,105 @@
-from gui import *
-import random
-#https://docs.python.org/3/library/random.html
+from tkinter import *
+from logic import *
+from PIL import ImageTk, Image
+#https://pillow.readthedocs.io/en/stable/handbook/tutorial.html
 
-class Logic:
+class Gui:
     """
-    A class representing the logic for the GUI.
+    A class representing a GUI object.
     """
-    def __init__(self, gui) -> None:
+    def __init__(self, window, logic) -> None:
         """
-        Method to initialize the GUI.
-        :param gui: The GUI.
+        Method to set default values and initialize the GUI.
+        :param window: The GUI window.
+        :param logic: The logic to use.
         :return: None
         """
-        self.gui = gui
+        self.window = window
+        self.logic = logic
+        self.balance = 1000
+        self.current_bet = 0
+        self.load_images()
+        self.shape_images = {
+            0: self.img_star,
+            1: self.img_diamond,
+            2: self.img_circle,
+            3: self.img_square,
+            4: self.img_triangle,
+            5: self.img_heart
+        }
+
+        self.frame_one = Frame(self.window)
+        self.label_balance = Label(self.frame_one, text="Balance: ", font=("Arial", 14))
+        self.label_balance_number = Label(
+        self.frame_one, text=f'{self.balance}', font=("Arial", 14), bg="white", width=10, relief="sunken")
+        self.label_balance.pack(side='left')
+        self.label_balance_number.pack(side='left', padx=5)
+        self.frame_one.pack(pady=10)
+
+        self.frame_two = Frame(self.window)
+        self.slot1 = Label(self.frame_two, image=self.img_blank, borderwidth=4, relief="ridge")
+        self.slot2 = Label(self.frame_two, image=self.img_blank, borderwidth=4, relief="ridge")
+        self.slot3 = Label(self.frame_two, image=self.img_blank, borderwidth=4, relief="ridge")
+        self.slot1.pack(side="left", padx=10)
+        self.slot2.pack(side="left", padx=10)
+        self.slot3.pack(side="left", padx=10)
+        self.frame_two.pack(pady=10)
+
+        self.frame_three = Frame(self.window)
+        self.label_bet = Label(self.frame_three, text="Bet: ")
+        self.input_bet = Entry(self.frame_three, width=20)
+        self.label_bet.pack(side='left')
+        self.input_bet.pack(side='right')
+        self.frame_three.pack(pady=10)
+
+        self.frame_four = Frame(self.window)
+        self.label_instructions = Label(self.frame_four, text="") #Displays instructions and winnings in text format
+        self.label_instructions.pack()
+        self.frame_four.pack()
+
+        self.frame_five = Frame(self.window)
+        self.img_save = ImageTk.PhotoImage(Image.open("images/button.png").resize((100, 100)))
+        self.save_button = Button(self.frame_five, image=self.img_save, command=self.submit, borderwidth=0)
+        self.save_button.image = self.img_save
+        self.save_button.pack()
+        self.frame_five.pack(padx=15, pady=15)
+
+        self.frame_six = Frame(self.window)
+        self.label_payout = Label(self.frame_six, image=self.img_payout_table)
+        self.label_payout.image = self.img_payout_table
+        self.label_payout.pack()
+        self.frame_six.pack(pady=5)
+
+        self.frame_seven = Frame(self.window)
+        self.reset_button = Button(self.frame_seven, text="Reset", command=self.reset, borderwidth=0)
+        self.reset_button.pack()
+        self.frame_seven.pack(pady=5)
+
+    def load_images(self) -> None:
+        """
+        Method to load the images for the GUI.
+        :return: None
+        """
+        self.img_blank = ImageTk.PhotoImage(Image.open("images/blank.png").resize((100, 100)))
+        self.img_square = ImageTk.PhotoImage(Image.open("images/square.png").resize((100, 100)))
+        self.img_circle = ImageTk.PhotoImage(Image.open("images/circle.png").resize((100, 100)))
+        self.img_star = ImageTk.PhotoImage(Image.open("images/star.png").resize((100, 100)))
+        self.img_diamond = ImageTk.PhotoImage(Image.open("images/diamond.png").resize((100, 100)))
+        self.img_heart = ImageTk.PhotoImage(Image.open("images/heart.png").resize((100, 100)))
+        self.img_triangle = ImageTk.PhotoImage(Image.open("images/triangle.png").resize((100, 100)))
+        self.img_payout_table = ImageTk.PhotoImage(Image.open("images/payout_table.png").resize((200, 300))) #300, 500 for larger screens
+        self.img_save = ImageTk.PhotoImage(Image.open("images/button.png").resize((100, 100)))
 
     def submit(self) -> None:
         """
-        Method to check valid bet and roll the slots.
+        Method to send the button press to logic.
         :return: None
         """
-        try:
-            bet = int(self.gui.input_bet.get())
-            if bet <= 0:
-                raise ValueError
-            if bet > self.gui.balance:
-                raise ValueError
-            self.gui.label_instructions.config(text="")
-            self.gui.input_bet.config(state="disabled")
-            self.gui.save_button.config(state="disabled")
-            self.gui.reset_button.config(state="disabled")
-            self.gui.current_bet = bet
-            self.roll()
-        except ValueError:
-            self.gui.label_instructions.config(text="Enter a valid bet value")
+        self.logic.submit()
 
     def reset(self) -> None:
         """
-        Method to reset the GUI.
+        Method to send the reset press to logic.
         :return: None
         """
-        self.gui.label_instructions.config(text="")
-        self.gui.balance = 1000
-        self.gui.label_balance_number.config(text=f'{self.gui.balance}')
-        self.gui.slot1.config(image=self.gui.img_blank)
-        self.gui.slot2.config(image=self.gui.img_blank)
-        self.gui.slot3.config(image=self.gui.img_blank)
-        self.gui.input_bet.delete(0, END)
-        self.gui.window.focus_set()
-
-    def roll(self) -> None:
-        """
-        Method to initialize the roll and begin the rolling.
-        :return: None
-        """
-        self.gui.roll_count = 0
-        self.gui.sleeptime = 10
-        self.animate_roll()
-
-    def animate_roll(self) -> None:
-        """
-        Method to animate the roll and call the final roll.
-        :return: None
-        """
-        if self.gui.roll_count <= 14:
-            rolled_image1 = self.gui.shape_images[random.randint(0, 5)]
-            rolled_image2 = self.gui.shape_images[random.randint(0, 5)]
-            rolled_image3 = self.gui.shape_images[random.randint(0, 5)]
-            self.gui.slot1.config(image=rolled_image1)
-            self.gui.slot2.config(image=rolled_image2)
-            self.gui.slot3.config(image=rolled_image3)
-            self.gui.roll_count += 1
-            self.gui.sleeptime += 5
-            self.gui.window.after(self.gui.sleeptime, self.animate_roll)
-        else:
-            self.choose_shapes()
-            self.gui.window.after(100, lambda: self.gui.save_button.config(state="normal"))
-            self.gui.window.after(100, lambda: self.gui.input_bet.config(state="normal"))
-            self.gui.window.after(100, lambda: self.gui.reset_button.config(state="normal"))
-
-    def choose_shapes(self) -> None:
-        """
-        Method to decide the final roll, set its display, call to adjust the balance, and call to display winnings.
-        :return: None
-        """
-        roll = random.uniform(0, 100)
-        shapes = {
-            "star": 0,
-            "diamond": 1,
-            "circle": 2,
-            "square": 3,
-            "triangle": 4,
-            "heart": 5
-        }
-
-        if roll <= 1:  # 1%
-            result = [shapes["star"]] * 3
-            payout_multiplier = 30
-            winnings_text = "Stars"
-        elif roll <= 2.5:  # 1.5%
-            result = [shapes["diamond"]] * 3
-            payout_multiplier = 12
-            winnings_text = "Diamonds"
-        elif roll <= 4:  # 1.5%
-            result = [shapes["circle"]] * 3
-            payout_multiplier = 9
-            winnings_text = "Circles"
-        elif roll <= 6:  # 2%
-            result = [shapes["square"]] * 3
-            payout_multiplier = 6
-            winnings_text = "Squares"
-        elif roll <= 8:  # 2%
-            result = [shapes["triangle"]] * 3
-            payout_multiplier = 4
-            winnings_text = "Triangles"
-        elif roll <= 10:  # 2%
-            result = [shapes["heart"]] * 3
-            payout_multiplier = 3
-            winnings_text = "Hearts"
-        elif roll <= 40:  # 30%
-            pair_shape = random.randint(0, 5)
-            available_shapes = []
-            for i in range(len(shapes)):
-                if i != pair_shape:
-                    available_shapes.append(i)
-            other_shape = random.choice(available_shapes)
-            result = [pair_shape, pair_shape, other_shape]
-            random.shuffle(result)
-            payout_multiplier = 2
-            winnings_text = "Pair"
-        else:
-            result = random.sample(range(len(shapes)), 3)  # 60%
-            payout_multiplier = 0
-            winnings_text = "Nothing"
-
-        self.gui.slot1.config(image=self.gui.shape_images[result[0]])
-        self.gui.slot2.config(image=self.gui.shape_images[result[1]])
-        self.gui.slot3.config(image=self.gui.shape_images[result[2]])
-
-        bet = self.gui.current_bet
-        winnings = bet * payout_multiplier
-        self.adjust_balance(bet, winnings)
-
-        profit = winnings - bet
-        self.display_winnings(profit, winnings_text)
-
-    def adjust_balance(self, bet: int, winnings: int) -> None:
-        """
-        Method to adjust the balance based on the bet and roll.
-        :param bet: The amount of the bet.
-        :param winnings: The bet times the payout multiplier.
-        :return: None
-        """
-        self.gui.balance = self.gui.balance - bet + winnings
-        self.gui.label_balance_number.config(text=f'{self.gui.balance}')
-
-    def display_winnings(self, profit: int, winnings_text: str) -> None:
-        """
-        Method to display the winnings in text format.
-        This method was added as feedback from the instructor.
-        :param profit: The winnings minus the initial bet.
-        :param winnings_text: The text to display.
-        :return: None
-        """
-        if winnings_text == "Pair":
-            self.gui.label_instructions.config(text=f'You made {profit} profit with a {winnings_text} of shapes.')
-        elif winnings_text == "Nothing":
-            self.gui.label_instructions.config(text=f'You lost {profit * -1} money with no matching shapes.')
-        else:
-            self.gui.label_instructions.config(text=f'You made {profit} profit with 3 {winnings_text}.')
+        self.logic.reset()
