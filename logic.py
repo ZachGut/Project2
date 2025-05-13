@@ -120,7 +120,7 @@ class Logic:
         elif roll <= 40:  # 30%
             pair_shape = random.randint(0, 5)
             available_shapes = []
-            for i in range(6):
+            for i in range(len(shapes)):
                 if i != pair_shape:
                     available_shapes.append(i)
             other_shape = random.choice(available_shapes)
@@ -129,7 +129,7 @@ class Logic:
             payout_multiplier = 2
             winnings_text = "Pair"
         else:
-            result = random.sample(range(6), 3)  # 60%
+            result = random.sample(range(len(shapes)), 3)  # 60%
             payout_multiplier = 0
             winnings_text = "Nothing"
 
